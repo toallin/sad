@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construcción 2 | ¡Apruebe por favor, Ingeniero! 🏎️🐱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Outfit:wght@400;600;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #070a12;
+            --bg-surface: #0d1322;
+            --border-subtle: rgba(56, 189, 248, 0.18);
+            --border-glow: rgba(56, 189, 248, 0.4);
+            --accent-cyan: #38bdf8;
+            --accent-emerald: #10b981;
+            --accent-purple: #c084fc;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-font: 'Fira Code', monospace;
+            --ui-font: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--ui-font);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.08) 0%, transparent 50%),
+                radial-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 28px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem 3rem 1rem;
+        }
+
+        /* Ventana Principal */
+        .ide-window {
+            width: 100%;
+            max-width: 980px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 45px rgba(56, 189, 248, 0.07);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de Título */
+        .ide-titlebar {
+            background: #090e1a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--code-font);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .titlebar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #ef4444;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+        }
+
+        .dot-yellow {
+            background: #f59e0b;
+        }
+
+        .dot-green {
+            background: #10b981;
+        }
+
+        .titlebar-path {
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .badge-fail {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        /* Sección Principal */
+        .hero-section {
+            padding: 2.2rem 1.5rem 1.4rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            text-align: left;
+            position: relative;
+        }
+
+        /* Mascota GitHub con mantel */
+        .octocat-box {
+            position: relative;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .octocat-img {
+            width: 165px;
+            height: 165px;
+            object-fit: contain;
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.25));
+            animation: floatCat 3.2s ease-in-out infinite alternate;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Mantel debajo del gato */
+        .mantel {
+            width: 150px;
+            height: 22px;
+            background: repeating-linear-gradient(90deg,
+                    #dc2626 0px, #dc2626 12px,
+                    #ffffff 12px, #ffffff 24px);
+            border-radius: 4px 4px 12px 12px;
+            margin-top: -8px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(220, 38, 38, 0.3);
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Flecos del mantel */
+        .mantel::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(90deg,
+                    #dc2626 0px, #dc2626 6px,
+                    transparent 6px, transparent 12px);
+            border-radius: 0 0 4px 4px;
+        }
+
+        @keyframes floatCat {
+            0% {
+                transform: translateY(0px) rotate(-1deg);
+            }
+
+            100% {
+                transform: translateY(-8px) rotate(1.5deg);
+            }
+        }
+
+        .hero-info {
+            max-width: 580px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .course-tag {
+            align-self: flex-start;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 0.3rem 0.85rem;
+            border-radius: 30px;
+            font-family: var(--code-font);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 4.2vw, 3rem);
+            font-weight: 900;
+            line-height: 1.15;
+            background: linear-gradient(135deg, #ffffff 40%, #38bdf8 80%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .hero-subtitle code {
+            font-family: var(--code-font);
+            background: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            font-size: 0.9em;
+        }
+
+        /* Decoración de autos */
+        .car-strip {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 0.5rem 1rem 0;
+            font-size: 1.8rem;
+            opacity: 0.85;
+            user-select: none;
+        }
+
+        .car-strip span {
+            animation: drive 3s ease-in-out infinite alternate;
+            display: inline-block;
+        }
+
+        .car-strip span:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .car-strip span:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .car-strip span:nth-child(4) {
+            animation-delay: 0.9s;
+        }
+
+        @keyframes drive {
+            0% {
+                transform: translateX(-6px) rotate(-2deg);
+            }
+
+            100% {
+                transform: translateX(6px) rotate(2deg);
+            }
+        }
+
+        /* Contenedor del Video */
+        .video-container {
+            margin: 0.5rem 1.75rem 1.75rem 1.75rem;
+            background: #000;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.12);
+            position: relative;
+        }
+
+        .video-bar {
+            background: #0a0f1d;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: var(--code-font);
+            font-size: 0.78rem;
+            color: var(--accent-cyan);
+        }
+
+        .video-status-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #ef4444;
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            from {
+                opacity: 0.4;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        #main-video {
+            width: 100%;
+            max-height: 540px;
+            display: block;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Barra de estado inferior */
+        .ide-footer-bar {
+            background: #080c16;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.65rem 1.25rem;
+            font-family: var(--code-font);
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .ticker-message {
+            color: #38bdf8;
+        }
+
+        /* Mensaje central de aprobación */
+        .approve-message {
+            margin: 0 1.75rem 2rem 1.75rem;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(24, 18, 48, 0.95));
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 0 35px rgba(192, 132, 252, 0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .approve-title {
+            font-size: clamp(1.4rem, 2.8vw, 2rem);
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        .approve-title span {
+            color: var(--accent-purple);
+        }
+
+        .approve-desc {
+            font-size: 0.98rem;
+            color: #cbd5e1;
+            max-width: 580px;
+        }
+
+        .efficiency-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-family: var(--code-font);
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="ide-window">
+
+        <!-- Barra Superior -->
+        <header class="ide-titlebar">
+            <div class="titlebar-left">
+                <div class="window-dots">
+                    <span class="window-dot dot-red"></span>
+                    <span class="window-dot dot-yellow"></span>
+                    <span class="window-dot dot-green"></span>
+                </div>
+                <div class="titlebar-path">
+                    <span>evaluacion</span>
+                    <span>/</span>
+                    <span>construccion_2</span>
+                    <span>/</span>
+                    <strong style="color: #fff;">proyecto_final.cs</strong>
+                </div>
+            </div>
+            <div class="badge-fail">
+                <span>🔴 BUILD FAILED</span>
+            </div>
+        </header>
+
+        <!-- Sección Principal con el Octocat y mantel -->
+        <section class="hero-section">
+            <div class="octocat-box">
+                <img src="github_sad.png" alt="Mascota de GitHub triste" class="octocat-img">
+                <div class="mantel" title="Mantel de picnic"></div>
+            </div>
+
+            <div class="hero-info">
+                <div class="course-tag">⚡ CURSO: CONSTRUCCIÓN 2</div>
+                <h1 class="hero-title">¡Apruebe por favor, Ingeniero!</h1>
+                <p class="hero-subtitle">
+                    Soy eficiente y este proyecto lo demuestra. Hasta el gato de GitHub está llorando
+                    con su mantel puesto... Le juramos que <code>en mi máquina sí compilaba</code>.
+                </p>
+            </div>
+        </section>
+
+        <!-- Franja decorativa de autos -->
+        <div class="car-strip">
+            <span>🏎️</span>
+            <span>🚗</span>
+            <span>🚙</span>
+            <span>🏁</span>
+            <span>🚕</span>
+        </div>
+
+        <!-- Video protagonista -->
+        <section class="video-container">
+            <div class="video-bar">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="video-status-dot"></span>
+                    <span>sad.mp4</span>
+                    <span style="color: var(--text-muted);">(1080p Full HD)</span>
+                </div>
+                <span style="color: var(--text-muted); font-size: 0.72rem;">Evidencia audiovisual</span>
+            </div>
+
+            <video id="main-video" src="sad.mp4" autoplay loop muted playsinline></video>
+        </section>
+
+        <!-- Mensaje de aprobación -->
+        <section class="approve-message">
+            <h2 class="approve-title">⚖️ <span>INGENIERO</span>, SOY EFICIENTE</h2>
+            <p class="approve-desc">
+                Este proyecto de <strong>Construcción 2</strong> fue hecho con dedicación, café y la esperanza
+                de su aprobación. La eficiencia está garantizada.
+            </p>
+            <div class="efficiency-badge">
+                <span>✅</span>
+                <span>EFICIENCIA COMPROBADA AL 100%</span>
+            </div>
+        </section>
+
+        <!-- Barra de estado inferior -->
+        <footer class="ide-footer-bar">
+            <div>
+                <span>[LOG]: </span>
+                <span class="ticker-message" id="ticker-msg">Esperando la firma y misericordia del Ingeniero de
+                    Construcción 2...</span>
+            </div>
+            <div>
+                <span>UTF-8 | Git: main* | Construcción 2</span>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Script mínimo: solo ticker de mensajes -->
+    <script>
+        const messages = [
+            "Analizando eficiencia del proyecto de Construcción 2...",
+            "Git status: 42 commits empujados con amor y café",
+            "El gato de GitHub con mantel suplica la aprobación del docente...",
+            "Esperando la firma y misericordia del Ingeniero de Construcción 2..."
+        ];
+        let msgIdx = 0;
+        const ticker = document.getElementById('ticker-msg');
+        setInterval(() => {
+            msgIdx = (msgIdx + 1) % messages.length;
+            ticker.textContent = messages[msgIdx];
+        }, 3600);
+    </script>
+</body>
+
+</html>
